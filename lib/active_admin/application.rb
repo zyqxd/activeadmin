@@ -175,8 +175,11 @@ module ActiveAdmin
     # As well, we have to remove it from +eager_load_paths+ to prevent the
     # files from being loaded twice in production.
     def remove_active_admin_load_paths_from_rails_autoload_and_eager_load
-      ActiveSupport::Dependencies.autoload_paths -= load_paths
-      Rails.application.config.eager_load_paths -= load_paths
+      ActiveSupport::Dependencies.autoload_paths.reject!{ |path| load_paths.include? path }
+      Rails.application.config.eager_load_paths = # the array is frozen :/
+        Rails.application.config.eager_load_paths.reject do |path|
+          load_paths.include?(path)
+        end
     end
 
     # Hook into the Rails code reloading mechanism so that things are reloaded
